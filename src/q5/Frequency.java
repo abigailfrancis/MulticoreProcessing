@@ -21,7 +21,7 @@ public class Frequency implements Callable<Integer> {
     @Override
     public Integer call() {
         Integer total = 0;
-        for(int i = 0; i < this.subArray.length; i++) {
+        for (int i = 0; i < this.subArray.length; i++) {
             if (this.subArray[i] == this.target) {
                 total++;
             }
@@ -32,14 +32,7 @@ public class Frequency implements Callable<Integer> {
     /*
     Creates numThreads threads that will compute the frequency of integer x within Array A
      */
-    public static int parallelFreq(int x, int[] A, int numThreads){
-
-        // Set up
-        int result = 0;
-        int start = 0;
-        int end = 0;
-        int[] subArr = {};
-
+    public static int parallelFreq(int x, int[] A, int numThreads) {
         // Input validation
         // Check if numThreads is an invalid number
         if (numThreads <= 0) {
@@ -65,9 +58,12 @@ public class Frequency implements Callable<Integer> {
         // Create a list of Frequency callables
         List<Frequency> callables = new ArrayList<>();
 
-        for(int i = 0; i < numThreads; i++){
+        int start;
+        int end;
+        int[] subArr;
+        for (int i = 0; i < numThreads; i++) {
             start = i * interval;
-            end = Math.min(start + interval, A.length);
+            end = (i == numThreads - 1) ? A.length : start + interval;
 
             subArr = Arrays.copyOfRange(A, start, end);
 
@@ -76,25 +72,26 @@ public class Frequency implements Callable<Integer> {
         }
 
         // Create a list of Futures to hold the results of the Callables
-        List<Future<Integer>> futures = new ArrayList<>();
+        List<Future<Integer>> futures;
+
+        // Create an integer to track the result frequency
+        int result = 0;
 
         // Invoke all of the Callables
         try {
-            futures  = executor.invokeAll(callables);
+            futures = executor.invokeAll(callables);
+
+            // Process the results
+            for (Future<Integer> fut : futures) {
+                result += fut.get();
+            }
         } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
             e.printStackTrace();
         }
 
-        // Examine the results
-        for(Future<Integer> fut : futures){
-            try {
-                result += fut.get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
-
-        // Shut down the executor service now
+        // Shut down the executor service
         executor.shutdown();
 
         // Return the total computed frequency
