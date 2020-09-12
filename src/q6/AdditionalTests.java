@@ -54,4 +54,10 @@ public class AdditionalTests
         int res = q6.AtomicInteger.PIncrement.parallelIncrement(this.startC, this.numThreads);
         assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200000 + startC);
     }
+
+    @Test
+    public void TestReentrantLock() {
+        int res = q6.ReentrantLock.PIncrement.parallelIncrement(this.startC, this.numThreads);
+        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200000 + startC);
+    }
 }
