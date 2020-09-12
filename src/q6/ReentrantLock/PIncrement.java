@@ -91,6 +91,7 @@ public class PIncrement implements Runnable{
         }
     }
 
+    /// Uses a synchronized context to increment a shared static variable
     private void increaseCounter() {
         lock.lock();
         try {

@@ -29,7 +29,7 @@ public class AdditionalTests
     public static Collection data()
     {
         var numThreadsVals = new int[] {1, 2, 3, 4, 5, 6, 7, 8};
-        var startCVals = new int[] {0, 100, 1234, -500};
+        var startCVals = new int[] {0}; //, 100, 1234, -500};
 
         var testParams = new ArrayList<>();
 
@@ -49,15 +49,23 @@ public class AdditionalTests
         assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200000 + startC);
     }
 
+
     @Test
     public void TestAtomicInteger() {
         int res = q6.AtomicInteger.PIncrement.parallelIncrement(this.startC, this.numThreads);
         assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200000 + startC);
     }
 
+
     @Test
     public void TestReentrantLock() {
         int res = q6.ReentrantLock.PIncrement.parallelIncrement(this.startC, this.numThreads);
         assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200000 + startC);
+    }
+
+    @Test
+    public void TestTournamentLock() {
+        int res = q6.Tournament.PIncrement.parallelIncrement(this.startC, this.numThreads);
+        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200 + startC);
     }
 }

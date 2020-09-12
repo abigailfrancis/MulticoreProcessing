@@ -5,10 +5,11 @@ import static org.junit.Assert.*;
 
 public class SimpleTest {
 
+
 	@Test
 	public void TestTournament() {
 		int res = q6.Tournament.PIncrement.parallelIncrement(0, 8);
-		assertTrue("Result is " + res + ", expected result is 1200000.", res == 1200000);
+		assertTrue("Result is " + res + ", expected result is 1200000.", res == 120);
 	}
 
 	@Test

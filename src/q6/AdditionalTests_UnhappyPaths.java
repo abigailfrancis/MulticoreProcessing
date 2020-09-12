@@ -16,7 +16,17 @@ public class AdditionalTests_UnhappyPaths
     }
 
     // Peterson's Tournament Algorithm
-    // Todo
+    @Test
+    public void TestTournamentWithInvalidNumThreadsZero() {
+        int res = q6.Tournament.PIncrement.parallelIncrement(0, 0);
+        assertEquals("Result is " + res + ", expected result is 1200000.", res, -1);
+    }
+
+    @Test
+    public void TestTournamentWithInvalidNumThreadsNine() {
+        int res = q6.Tournament.PIncrement.parallelIncrement(0, 9);
+        assertEquals("Result is " + res + ", expected result is 1200000.", res, -1);
+    }
 
     // Synchronized
     @Test
