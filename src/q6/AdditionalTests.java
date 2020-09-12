@@ -10,16 +10,16 @@ import java.util.Collection;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
-public class SynchronizedAdditionalTests
+public class AdditionalTests
 {
     private final int numThreads;
     private final int startC;
 
     /*
-    Unit tests for PIncrement, using the Java keyword Synchornized
+    Unit tests for various implementations of PIncrement
     This file covers the happy paths for various "c" and "numThreads" values
      */
-    public SynchronizedAdditionalTests(final int input, final int startC)
+    public AdditionalTests(final int input, final int startC)
     {
         this.numThreads = input;
         this.startC = startC;
@@ -33,9 +33,9 @@ public class SynchronizedAdditionalTests
 
         var testParams = new ArrayList<>();
 
-        for (int i = 0; i < startCVals.length; i++) {
-            for (int j = 0; j < numThreadsVals.length; j++) {
-                testParams.add(new Object[] {numThreadsVals[j], startCVals[i]});
+        for (int startCVal : startCVals) {
+            for (int numThreadsVal : numThreadsVals) {
+                testParams.add(new Object[]{numThreadsVal, startCVal});
             }
         }
 
@@ -46,6 +46,12 @@ public class SynchronizedAdditionalTests
     public void TestSynchronized() {
         int res = q6.Synchronized.PIncrement.parallelIncrement(this.startC, this.numThreads);
 
-        assertTrue("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res == 1200000 + startC);
+        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200000 + startC);
+    }
+
+    @Test
+    public void TestAtomicInteger() {
+        int res = q6.AtomicInteger.PIncrement.parallelIncrement(this.startC, this.numThreads);
+        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200000 + startC);
     }
 }

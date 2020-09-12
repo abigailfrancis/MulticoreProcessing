@@ -13,7 +13,7 @@ public class PIncrement implements Runnable{
     private static int[] totalIncrementOperations;
     private static final Object lock = new Object();
 
-    private int threadNum;
+    private final int threadNum;
 
     /*
     * Creates a new instance of the PIncrement class
@@ -74,7 +74,7 @@ public class PIncrement implements Runnable{
         // Compute the duration
         long duration = endTime - startTime;
         double durationInMs = duration / 1000000.0;
-        System.out.println("[" + numThreads + ", " + c + "]: " + durationInMs + " ms");
+        System.out.println("Synchronized: [" + numThreads + ", " + c + "]: " + durationInMs + " ms");
 
         // Return the final count
         return counter;
