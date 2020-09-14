@@ -45,8 +45,11 @@ public class Frequency implements Callable<Integer>{
 		int remainder = 0;
 		int startIdx = 0;
 		//check input validity
-		if (A.length == 0 | numThreads == 0) {
+		if (A == null || A.length == 0) {
 			return 0;
+		}
+		else if (numThreads <= 0) {
+			return -1;
 		}
 		//if the number of threads is greater than the size, limit 1 array value per thread
 		if(numThreads > A.length) {

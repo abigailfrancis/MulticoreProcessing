@@ -67,11 +67,12 @@ public class TestFcy {
         /*TESTING 0 THREADS*/
         int[] B = {1,1,1,1,1,1,1,1,1,1};
         threads = 0; 
-        expected = 0;
+        expected = -1;
         frequency = Frequency.parallelFreq(find, B, threads);
         assertTrue("EXPECTED VALUE OF "+find+" = "+expected + "; THREADS = "+threads+ ";	RESULT = " + frequency , frequency == expected);
         
         /*TESTING NON ZERO ARRAY WITH NON EXIST FIND*/
+        threads = 10;
         find = 0;
         expected = 0;
         frequency = Frequency.parallelFreq(find, B, threads);
@@ -176,5 +177,5 @@ public class TestFcy {
         
         
     }
-    
+
 }
