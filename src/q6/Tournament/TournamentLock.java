@@ -30,9 +30,9 @@ public class TournamentLock implements Lock {
         int numNodesInFullTree = (int)Math.pow(2, this.treeHeight + 1) -1;
         this.flag = new int[numNodesInFullTree];
 
-        // Initialize flag values to -1 (We are using 0 as the pid initial index)
+        // Initialize flag values to 0
         for (int i = 0; i < numNodesInFullTree; i++) {
-            this.flag[i] = -1;
+            this.flag[i] = 0;
         }
 
         // Initialize turn values to false
