@@ -36,12 +36,12 @@ public class PIncrement implements Runnable{
         // Determine number of increment operations required
         totalIncrementOperations = new int[numThreads];
         for(int t = 0; t < numThreads; t++) {
-            totalIncrementOperations[t] = 1200 / (numThreads);
+            totalIncrementOperations[t] = 1200000 / (numThreads);
         }
 
         // Special case because 7 does not divide evenly into 1,200,000
         if(numThreads == 7) {
-            totalIncrementOperations[6] = 1; //171432;
+            totalIncrementOperations[6] = 171432;
         }
 
         // Initialize the shared lock

@@ -66,6 +66,6 @@ public class AdditionalTests
     @Test
     public void TestTournamentLock() {
         int res = q6.Tournament.PIncrement.parallelIncrement(this.startC, this.numThreads);
-        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200 + startC);
+        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200000 + startC);
     }
 }
