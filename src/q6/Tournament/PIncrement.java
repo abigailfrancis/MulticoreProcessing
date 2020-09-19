@@ -95,7 +95,8 @@ public class PIncrement implements Runnable{
     private void increaseCounter() {
         lock.lock(this.threadNum);
         try {
-            counter++;
+            counter = counter + 1;
+            //System.out.println("PID " + this.threadNum + " increased the counter to " + counter);
         } finally {
             lock.unlock(this.threadNum);
         }

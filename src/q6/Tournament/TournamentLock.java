@@ -1,14 +1,14 @@
 package q6.Tournament;
 
+import java.util.concurrent.atomic.AtomicIntegerArray;
+
 import static java.lang.Math.ceil;
-import static java.lang.Math.pow;
 
 public class TournamentLock implements Lock {
 
-    // Array representing a binary flag
-    private volatile int[] flag;
-    private volatile boolean[] turn;
-    private volatile int numThreads; // total nodes in the flag so far?
+    private AtomicIntegerArray flag;
+    private AtomicIntegerArray turn;
+    private volatile int numThreads;
     private volatile int treeHeight;
     private volatile int nextPowerOfTwo;
 
@@ -21,23 +21,22 @@ public class TournamentLock implements Lock {
         this.treeHeight = getTreeHeight(this.numThreads);
 
         // Initialize turn to hold a value for each competition
-        this.turn = new boolean[getNumberOfCompetitions(this.treeHeight)];
+        this.turn = new AtomicIntegerArray(getNumberOfCompetitions(this.treeHeight));
+
+        // Initialize turn values to false
+        for (int i = 0; i < this.treeHeight; i++) {
+            this.turn.set(i, 0);
+        }
 
         // Compute number of leaf nodes in the full tree
         this.nextPowerOfTwo = (int)Math.pow(2, this.treeHeight);
 
-        // Compute total number of nodes in the full tree
-        int numNodesInFullTree = (int)Math.pow(2, this.treeHeight + 1) -1;
-        this.flag = new int[numNodesInFullTree];
+        // Initialize flag with space for all leaf nodes
+        this.flag = new AtomicIntegerArray(this.nextPowerOfTwo);
 
         // Initialize flag values to 0
-        for (int i = 0; i < numNodesInFullTree; i++) {
-            this.flag[i] = 0;
-        }
-
-        // Initialize turn values to false
-        for (int i = 0; i < this.treeHeight; i++) {
-            this.turn[i] = false;
+        for (int i = 0; i < this.nextPowerOfTwo; i++) {
+            this.flag.set(i ,-1);
         }
     }
 
@@ -49,30 +48,30 @@ public class TournamentLock implements Lock {
         int currNode = (int)Math.pow(2, this.treeHeight + 1) - 1 - this.nextPowerOfTwo + pid;
 
         // Determine if current leaf node is a left (false) or right (true) child
-        boolean role = (currNode % 2) == 0;
+        int role = (currNode % 2) == 0 ? 1 : 0;
 
         // Loop through k-1 levels in the tree
-        for (int k = 1; k < this.treeHeight; k++)
+        for (int k = 0; k < this.treeHeight; k++)
         {
             // Identify parent node index
             var myParent = (int)Math.floor((currNode - 1) / 2.0);
 
             // Determine if my parent node is a left (false) or right (true) child
-            var roleOfMyParent = (myParent % 2) == 0;
+            var roleOfMyParent = (myParent % 2) == 0 ? 1 : 0;
 
             // Identify competitors for this match
             // For the first competition, lowerBound and upperBound will encompass 2 nodes
             // For the second competition, lowerBound and upperBound will encompass 4 nodes
             // etc.
-            var powerOfTwo = (int)Math.pow(2, k);
+            var powerOfTwo = (int)Math.pow(2, (k+1));
             var lowerBound = (pid / powerOfTwo) * powerOfTwo;
             var upperBound = lowerBound + powerOfTwo;
 
-            this.flag[pid] = k; // wantCS = true
-            this.turn[myParent] = role;  // turn = j
+            this.flag.set(pid, k); // gate[i] = k
+            this.turn.set(myParent, role);  // last[k] = i
 
             for (int j = lowerBound; j < upperBound; j++) {        // for each of my potential competitors
-                while (j != pid && this.flag[j] >= k && this.turn[myParent] == role) {  // j != i && gate[j] >= k && last[k] == i
+                while (j != pid && this.flag.get(j) >= k && this.turn.get(myParent) == role) {  // j != i && gate[j] >= k && last[k] == i
                     // skip/no-op
                 }
             }
@@ -87,7 +86,7 @@ public class TournamentLock implements Lock {
 
     @Override
     public void unlock(int pid) {
-        this.flag[pid] = 0;
+        this.flag.set(pid, -1);
     }
 
     /*

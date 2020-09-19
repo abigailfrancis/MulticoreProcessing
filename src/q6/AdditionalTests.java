@@ -46,26 +46,26 @@ public class AdditionalTests
     public void TestSynchronized() {
         int res = q6.Synchronized.PIncrement.parallelIncrement(this.startC, this.numThreads);
 
-        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200000 + startC);
+        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", 1200000 + startC, res);
     }
 
 
     @Test
     public void TestAtomicInteger() {
         int res = q6.AtomicInteger.PIncrement.parallelIncrement(this.startC, this.numThreads);
-        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200000 + startC);
+        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", 1200000 + startC, res);
     }
 
 
     @Test
     public void TestReentrantLock() {
         int res = q6.ReentrantLock.PIncrement.parallelIncrement(this.startC, this.numThreads);
-        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200000 + startC);
+        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", 1200000 + startC, res);
     }
 
     @Test
     public void TestTournamentLock() {
         int res = q6.Tournament.PIncrement.parallelIncrement(this.startC, this.numThreads);
-        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", res, 1200000 + startC);
+        assertEquals("Numthreads: " + this.numThreads + ", Start C: " + this.startC + " : Result is " + res + "", 1200000 + startC, res);
     }
 }
