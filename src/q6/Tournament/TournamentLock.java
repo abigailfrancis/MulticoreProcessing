@@ -51,8 +51,7 @@ public class TournamentLock implements Lock {
         // Determine if current leaf node is a left (false) or right (true) child
         boolean role = (currNode % 2) == 0;
 
-        // Same effect as using (int k = 1; k < this.treeHeight; k++)
-        // Starting with 0, instead, for indexing purposes.
+        // Loop through k-1 levels in the tree
         for (int k = 1; k < this.treeHeight; k++)
         {
             // Identify parent node index
