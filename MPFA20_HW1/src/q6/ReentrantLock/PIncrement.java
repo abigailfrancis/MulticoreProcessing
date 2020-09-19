@@ -1,21 +1,23 @@
-package q6.Synchronized;
+package q6.ReentrantLock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-import q6.Synchronized.PIncrement;
+
+import q6.ReentrantLock.PIncrement;
 
 //import q6.PIncrement;
 
 public class PIncrement implements Callable<Integer>{
 	private static final int m = 1200000;
 	static private int count;
-	private static final Object lock = new Object();
+	private static Lock lock = new ReentrantLock();
 	int ID;
 	int inc;
 	
@@ -25,13 +27,23 @@ public class PIncrement implements Callable<Integer>{
      }
 	public Integer call() {
 		for(int i = 0; i < inc; i++) {
-			synchronized(lock) {
-				count++;
-			}
+			increment();
 		}
 		//this isn't using the method indicated by the assignment
 		return inc;
 	}
+	private void increment() {
+		try {
+			if(lock.tryLock(10, TimeUnit.SECONDS)){
+				count++;
+				}
+		}catch(InterruptedException e) {
+			e.printStackTrace();
+		}finally {
+			lock.unlock();
+		}
+        
+    }
 	public static int parallelIncrement(int c, int numThreads) {
 	// your implementation goes here
 		int inc = m/numThreads;
@@ -67,10 +79,9 @@ public class PIncrement implements Callable<Integer>{
 	    // Compute the duration
 	    long duration = end - start;
 	    double durationInMs = duration / 1000000.0;
-	    System.out.println("Synchronized [" + numThreads + ", " + c + "]: " + durationInMs + " ms");
-	    
+	    System.out.println("ReentrantLock [" + numThreads + ", " + c + "]: " + durationInMs + " ms");
 		executor.shutdown();
-		return c; 
+		return c;
 	}
 
 }

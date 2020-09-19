@@ -64,7 +64,7 @@ public class PIncrement implements Callable<Integer>{
 	    // Compute the duration
 	    long duration = end - start;
 	    double durationInMs = duration / 1000000.0;
-	    System.out.println("AtomicInteger: [" + numThreads + ", " + c + "]: " + durationInMs + " ms");
+	    System.out.println("AtomicInteger [" + numThreads + ", " + c + "]: " + durationInMs + " ms");
 	    
 		executor.shutdown();
 		return c; 
