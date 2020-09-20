@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 public class SimpleTest {
 
+
 	@Test
 	public void TestTournament() {
 		int res = q6.Tournament.PIncrement.parallelIncrement(0, 8);
