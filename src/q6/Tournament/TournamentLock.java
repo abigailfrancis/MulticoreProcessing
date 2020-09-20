@@ -54,18 +54,18 @@ public class TournamentLock implements Lock {
         for (int k = 0; k < this.treeHeight; k++)
         {
             // Identify parent node index
-            var myParent = (int)Math.floor((currNode - 1) / 2.0);
+            int myParent = (int)Math.floor((currNode - 1) / 2.0);
 
             // Determine if my parent node is a left (false) or right (true) child
-            var roleOfMyParent = (myParent % 2) == 0 ? 1 : 0;
+            int roleOfMyParent = (myParent % 2) == 0 ? 1 : 0;
 
             // Identify competitors for this match
             // For the first competition, lowerBound and upperBound will encompass 2 nodes
             // For the second competition, lowerBound and upperBound will encompass 4 nodes
             // etc.
-            var powerOfTwo = (int)Math.pow(2, (k+1));
-            var lowerBound = (pid / powerOfTwo) * powerOfTwo;
-            var upperBound = lowerBound + powerOfTwo;
+            int powerOfTwo = (int)Math.pow(2, (k+1));
+            int lowerBound = (pid / powerOfTwo) * powerOfTwo;
+            int upperBound = lowerBound + powerOfTwo;
 
             this.flag.set(pid, k); // gate[i] = k
             this.turn.set(myParent, role);  // last[k] = i

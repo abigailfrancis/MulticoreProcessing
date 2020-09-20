@@ -28,10 +28,10 @@ public class AdditionalTests
     @Parameterized.Parameters()
     public static Collection data()
     {
-        var numThreadsVals = new int[] {1, 2, 3, 4, 5, 6, 7, 8};
-        var startCVals = new int[] {0, 100, 1234, -500};
+        int[] numThreadsVals = new int[] {1, 2, 3, 4, 5, 6, 7, 8};
+        int[] startCVals = new int[] {0, 100, 1234, -500};
 
-        var testParams = new ArrayList<>();
+        ArrayList<Object> testParams = new ArrayList<Object>();
 
         for (int startCVal : startCVals) {
             for (int numThreadsVal : numThreadsVals) {
