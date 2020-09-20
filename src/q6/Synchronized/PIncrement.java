@@ -1,77 +1,97 @@
 package q6.Synchronized;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import q6.Synchronized.PIncrement;
+public class PIncrement implements Runnable{
 
-//import q6.PIncrement;
+    private static int counter;
+    private static int[] totalIncrementOperations;
+    private static final Object lock = new Object();
 
-public class PIncrement implements Callable<Integer>{
-	private static final int m = 1200000;
-	static private int count;
-	private static final Object lock = new Object();
-	int ID;
-	int inc;
-	
-	public PIncrement(int ID, int inc) {
-        this.ID = ID;
-        this.inc = inc;
-     }
-	public Integer call() {
-		for(int i = 0; i < inc; i++) {
-			synchronized(lock) {
-				count++;
-			}
-		}
-		//this isn't using the method indicated by the assignment
-		return inc;
-	}
-	public static int parallelIncrement(int c, int numThreads) {
-	// your implementation goes here
-		int inc = m/numThreads;
-		count = c;
-		//create numThread threads
-		ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-		//create list to hold future integer counts
-		List<Future<Integer>> ret_list = new ArrayList<Future<Integer>>();
-				
-		//create callable instance
-		List<PIncrement>  I_list= new ArrayList<>();
-		
-		for(int i = 0; i < numThreads; i++) {
-			//if numThreads doesn't divide equally into m, allow last thread to supplement
-			if(i == numThreads - 1) {
-				inc += m - numThreads*(m/numThreads);
-			}
-			//add each new thread to the list
-			I_list.add(new PIncrement(i, inc));
-		}
-		
-	    // Start the timer
-	    long start = System.nanoTime();
-	    
-	    //execute 
-		try {
-			ret_list = executor.invokeAll(I_list);
-		} catch(InterruptedException e) {};
-		c = count;
-		//TIMING COMPUTATION 
-		// End the timer
-	    long end = System.nanoTime();
-	    // Compute the duration
-	    long duration = end - start;
-	    double durationInMs = duration / 1000000.0;
-	    System.out.println("Synchronized [" + numThreads + ", " + c + "]: " + durationInMs + " ms");
-	    
-		executor.shutdown();
-		return c; 
-	}
+    private final int threadNum;
 
+    /*
+    * Creates a new instance of the PIncrement class
+    */
+    public PIncrement(int threadNum) {
+        this.threadNum = threadNum;
+    }
+
+    /*
+      Initiates numThreads threads and uses them to perform 1,200,000 increments to shared variable 'c'
+     */
+    public static int parallelIncrement(int c, int numThreads){
+
+        // Validate input
+        if (numThreads <= 0 || numThreads > 8) {
+            return -1;
+        }
+
+        // Determine number of increment operations required
+        totalIncrementOperations = new int[numThreads];
+        for(int t = 0; t < numThreads; t++) {
+            totalIncrementOperations[t] = 1200000 / (numThreads);
+        }
+
+        // Special case because 7 does not divide evenly into 1,200,000
+        if(numThreads == 7) {
+            totalIncrementOperations[6] = 171432;
+        }
+
+        // Initialize the static int counter
+        counter = c;
+
+        // Start the timer
+        long startTime = System.nanoTime();
+
+        // Create and execute the threads
+        ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
+        List<Future> futures = new ArrayList<>();
+        for (int i = 0; i < numThreads; i++) {
+            futures.add(executorService.submit(new PIncrement(i)));
+        }
+        executorService.shutdown();
+
+        // Wait for the results to become available
+        for (int i = 0; i < numThreads; i++) {
+            try {
+                futures.get(i).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // End the timer
+        long endTime = System.nanoTime();
+
+        // Compute the duration
+        long duration = endTime - startTime;
+        double durationInMs = duration / 1000000.0;
+        System.out.println("Synchronized: [" + numThreads + ", " + c + "]: " + durationInMs + " ms");
+
+        // Return the final count
+        return counter;
+    }
+
+    @Override
+    public void run() {
+        for (int p = 0; p < totalIncrementOperations[this.threadNum]; p++) {
+            incrementCounter();
+        }
+    }
+
+    /// Uses a synchronized context to increment a shared static variable
+   private void incrementCounter() {
+        synchronized(lock) {
+            // System.out.println(Thread.currentThread().getName() + " : " + counter);
+            counter++;
+        }
+   }
 }
-
