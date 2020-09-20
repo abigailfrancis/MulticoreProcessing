@@ -91,12 +91,13 @@ public class PIncrement implements Runnable{
         }
     }
 
-    /// Uses a synchronized context to increment a shared static variable
+    /*
+    Uses a synchronized context to increment a shared static variable
+     */
     private void increaseCounter() {
         lock.lock(this.threadNum);
         try {
             counter = counter + 1;
-            //System.out.println("PID " + this.threadNum + " increased the counter to " + counter);
         } finally {
             lock.unlock(this.threadNum);
         }

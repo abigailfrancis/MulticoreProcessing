@@ -34,7 +34,7 @@ public class TournamentLock implements Lock {
         // Initialize flag with space for all leaf nodes
         this.flag = new AtomicIntegerArray(this.nextPowerOfTwo);
 
-        // Initialize flag values to 0
+        // Initialize flag values to -1
         for (int i = 0; i < this.nextPowerOfTwo; i++) {
             this.flag.set(i ,-1);
         }
