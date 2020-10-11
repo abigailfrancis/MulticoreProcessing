@@ -3,10 +3,11 @@ import java.util.concurrent.Semaphore;
 
 public class CyclicBarrier {
 	//counting semaphore 
+	private static Semaphore sem_waitingParties;
 	private static Semaphore sem_allParties;
 	private static Semaphore sem_arrivalIdx;
 	private static Semaphore sem_round;
-	private int arrivalIdx;
+	private static int arrivalIdx;
 	private int parties;
 	private final static Object obj = new Object();
 	//private boolean waiting = true;
@@ -20,6 +21,7 @@ public class CyclicBarrier {
     	this.parties = parties;
     	this.arrivalIdx = parties;
         this.sem_allParties = new Semaphore(parties-1, true);
+        this.sem_waitingParties = new Semaphore(parties, true);
         this.sem_arrivalIdx = new Semaphore(1, true);
         this.sem_round = new Semaphore(1,true);
     }
@@ -33,32 +35,39 @@ public class CyclicBarrier {
         // (parties - 1) indicates the first to arrive and zero indicates
         // the last to arrive.
     	int retval = -1;
-    	if(sem_round.availablePermits()==0) {
-    		System.out.println("Here1");
-    		while(sem_round.availablePermits()==0);
-    	}
-
+    	//all threads wait here unless part of the current party
+    	sem_waitingParties.acquire();
+    	
+    	//decrement arrival index
     	sem_arrivalIdx.acquire();
     	arrivalIdx--;
     	System.out.println(arrivalIdx);
     	retval = arrivalIdx;
     	sem_arrivalIdx.release();
     	
+    	//if not the last thread, wait
     	if(sem_allParties.tryAcquire()) {
-    		//this.waiting = true;
     		synchronized(obj) {
     			obj.wait();
     		}
+    		//release semaphore after notified
     		sem_allParties.release();
     		
     	}
     	else {
     		synchronized(obj) {
-    			sem_round.acquire();
+    			
+    			//set arrivalidx back to parties
+    			sem_arrivalIdx.acquire();
+        		arrivalIdx = this.parties;
+        		sem_arrivalIdx.release();
+        		
+        		//notify everyone to release and continue
     			obj.notifyAll();
-    			arrivalIdx = this.parties;
-    			System.out.println("ROUND DONE");
-    			sem_round.release();
+    			
+    			
+        		//allow next party in
+    			sem_waitingParties.release(this.parties);
     		}
     	}
         

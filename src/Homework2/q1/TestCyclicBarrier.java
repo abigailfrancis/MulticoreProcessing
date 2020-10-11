@@ -28,19 +28,19 @@ public class TestCyclicBarrier {
         ArrayList<Object> testParams = new ArrayList<Object>();
 
         // For happy path scenarios, numParties must divide evenly into numThreads
-        //testParams.add(new Object[]{8, 8});
+        testParams.add(new Object[]{8, 8});
         testParams.add(new Object[]{4, 8});
-        //testParams.add(new Object[]{2, 8});
-        //testParams.add(new Object[]{1, 8});
-        //testParams.add(new Object[]{7, 7});
-        //testParams.add(new Object[]{6, 6});
-        //testParams.add(new Object[]{5, 5});
-        //testParams.add(new Object[]{4, 4});
-        //testParams.add(new Object[]{2, 4});
-        //testParams.add(new Object[]{3, 3});
-        //testParams.add(new Object[]{2, 2});
-        //testParams.add(new Object[]{1, 2});
-        //testParams.add(new Object[]{1, 1});
+        testParams.add(new Object[]{2, 8});
+        testParams.add(new Object[]{1, 8});
+        testParams.add(new Object[]{7, 7});
+        testParams.add(new Object[]{6, 6});
+        testParams.add(new Object[]{5, 5});
+        testParams.add(new Object[]{4, 4});
+        testParams.add(new Object[]{2, 4});
+        testParams.add(new Object[]{3, 3});
+        testParams.add(new Object[]{2, 2});
+        testParams.add(new Object[]{1, 2});
+        testParams.add(new Object[]{1, 1});
 
         return testParams;
     }
