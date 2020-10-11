@@ -5,22 +5,15 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Monkey {
 
-    private ReentrantLock lock;
-    private Condition ropeIsEmpty;
-    private Condition ropeHasSpaceForMoreMonkeys;
-
+    private static ReentrantLock lock = new ReentrantLock();
+    private static Condition ropeIsEmpty = lock.newCondition();
+    private static Condition ropeHasSpaceForMoreMonkeys = lock.newCondition();
     private static int numMonkeysOnRope = 0;
     private static int directionOnTheRope = 0;
     private static boolean kongIsOnTheRope = false;
     private static boolean kongWantsTheRope = false;
 
-    public Monkey(ReentrantLock sharedLock, Condition cond1, Condition cond2)
-    {
-        this.lock = sharedLock;
-        this.ropeIsEmpty = cond1;
-        this.ropeHasSpaceForMoreMonkeys = cond2;
-    }
-
+    public Monkey() { }
 
     // A monkey calls the method when it arrives at the river bank and wants to climb
     // the rope in the specified direction (0 or 1); Kong’s direction is -1.
@@ -41,33 +34,40 @@ public class Monkey {
 
                 this.kongIsOnTheRope = true;
                 this.kongWantsTheRope = false;
-            } else {
-                // Else if I am not Kong, but Kong is waiting, I should wait
-                while (this.kongIsOnTheRope || this.kongWantsTheRope || (this.directionOnTheRope != direction && this.getNumMonkeysOnRope() > 0)) {
+            }
+            else // If I am not Kong
+            {
+                // I should wait
+                //   - if Kong is on the rope
+                //   - OR if Kong is waiting for the rope
+                //   - OR if the other monkeys are not moving in my direction
+                while (this.kongIsOnTheRope ||
+                        this.kongWantsTheRope ||
+                        (this.directionOnTheRope != direction && this.getNumMonkeysOnRope() > 0))
+                {
                     this.ropeIsEmpty.await();
                 }
 
+                // Set the rope's direction to my direction
                 this.directionOnTheRope = direction;
 
-                while (this.numMonkeysOnRope >= 3 || this.kongIsOnTheRope) {
+                while (this.numMonkeysOnRope >= 3 || this.kongIsOnTheRope)
+                {
                     this.ropeHasSpaceForMoreMonkeys.await();
                 }
             }
 
             // Climb the rope
             this.numMonkeysOnRope++;
-            System.out.println("Monkey going direction " + direction + " on the rope. Now there are " + this.numMonkeysOnRope);
+            // System.out.println("Monkey going direction " + direction + " on the rope. Now there are " + this.numMonkeysOnRope);
         }
         finally
         {
             lock.unlock();
 
             // For testing
-            Thread.sleep(20);
+            // Thread.sleep(20);
         }
-
-        // After crossing the river, every monkey calls this method
-        LeaveRope();
     }
 
     // After crossing the river, every monkey calls this method which

@@ -6,32 +6,26 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class MonkeyTester implements Runnable {
 
     private int monkeyDirection;
     private Monkey monkey;
 
-    public MonkeyTester(int monkeyDirection, ReentrantLock lock, Condition isEmpty, Condition hasRoom)
+    public MonkeyTester(int monkeyDirection)
     {
         this.monkeyDirection = monkeyDirection;
-        this.monkey = new Monkey(lock, isEmpty, hasRoom);
+        this.monkey = new Monkey();
     }
 
     public static void runTest(int[] monkeyDirectionList)
     {
-        ReentrantLock lock = new ReentrantLock();
-        Condition ropeIsEmpty = lock.newCondition();
-        Condition ropeHasSpaceForMoreMonkeys = lock.newCondition();
-
         int numMonkeys = monkeyDirectionList.length;
 
         ExecutorService executorService = Executors.newFixedThreadPool(numMonkeys);
         List<Future> futures = new ArrayList<>();
         for (int i = 0; i < numMonkeys; i++) {
-            futures.add(executorService.submit(new MonkeyTester(monkeyDirectionList[i], lock, ropeIsEmpty, ropeHasSpaceForMoreMonkeys)));
+            futures.add(executorService.submit(new MonkeyTester(monkeyDirectionList[i])));
         }
         executorService.shutdown();
 
@@ -51,6 +45,7 @@ public class MonkeyTester implements Runnable {
     public void run() {
         try {
             this.monkey.ClimbRope(this.monkeyDirection);
+            this.monkey.LeaveRope();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
