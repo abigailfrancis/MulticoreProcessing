@@ -1,5 +1,6 @@
 package Homework2.q1;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -47,5 +48,15 @@ public class TestCyclicBarrier {
     @Test
     public void TestSynchronized() {
         CyclicBarrierTester.runTest(numParties, numThreads);
+
+        // Each arrival index (parties -1, parties -2... 0) should occur numThreads/numParties times
+        int expectedCount = numThreads/ numParties;
+
+        for (int i = 0; i < numParties; i++)
+        {
+            Assert.assertTrue(CyclicBarrierTester.expectedArrivalIndices.containsKey(i));
+
+            Assert.assertTrue(CyclicBarrierTester.expectedArrivalIndices.get(i) == expectedCount);
+        }
     }
 }

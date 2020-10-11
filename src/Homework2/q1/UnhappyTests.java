@@ -29,6 +29,8 @@ public class UnhappyTests {
         ArrayList<Object> testParams = new ArrayList<Object>();
 
         // For unhappy path scenarios, numParties will not divide evenly into numThreads
+        // Note: These tests should all FAIL because there are "leftover" threads that won't meet the
+        // cyclic barrier threshold
         testParams.add(new Object[]{2, 3});
         testParams.add(new Object[]{2, 5});
         testParams.add(new Object[]{2, 7});
