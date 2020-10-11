@@ -4,12 +4,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Monkey {
     // declare the variables here
-	ReentrantLock dir = new ReentrantLock();
-	ReentrantLock Left = new ReentrantLock(); //0
-	ReentrantLock Right = new ReentrantLock(); //1
-	ReentrantLock kong = new ReentrantLock();
+	static ReentrantLock dir = new ReentrantLock();
+	static ReentrantLock Left = new ReentrantLock(); //0
+	static ReentrantLock Right = new ReentrantLock(); //1
+	static ReentrantLock kong = new ReentrantLock();
 	private static int monkeysLeft = 0;
-	private static int monkeysRight = 1;	
+	private static int monkeysRight = 0;	
 	private static int ropeDir = 0;
 	private static boolean konglock = false;
 
@@ -18,12 +18,13 @@ public class Monkey {
     // The method blocks a monkey until it is allowed to climb the rope.
     public void ClimbRope(int direction) throws InterruptedException {
     	boolean climb = false;
+    	boolean mydir = false;
     	switch (direction) {
     		case 1 :		//monkey right
     			while(!climb) {
 		    		//secure direction lock
-		    		while(ropeDir != direction && konglock) {
-		    			if(dir.tryLock()) {
+		    		while(ropeDir != direction) {
+		    			if(!konglock && dir.tryLock()) {
 		    				ropeDir = direction;
 		    			}	    			
 		    		}
@@ -45,7 +46,7 @@ public class Monkey {
     		case 0 :		//monkey left
 		    	while(!climb) {
 		    		//secure direction lock
-		    		while(ropeDir != direction && konglock) {
+		    		while(ropeDir != direction && !konglock) {
 		    			if(dir.tryLock()) {
 		    				ropeDir = direction;
 		    			}	    			
