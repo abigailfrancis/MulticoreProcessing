@@ -10,7 +10,6 @@ public class CyclicBarrier {
     private Semaphore mutex;
     private Semaphore mutexForThreadEnteringBarrier;
     private Semaphore mutexToWaitForThreadsToArrive;
-    private Semaphore mutexToWaitForThreadsToExecute;
 
     /* This class should only release threads only when
     the given number of threads are waiting upon it */
@@ -31,10 +30,6 @@ public class CyclicBarrier {
 
         // This mutex blocks all the threads until this.numThreadsNeededToBreakBarrier = this.numPartiesAllowedToEnter
         this.mutexToWaitForThreadsToArrive = new Semaphore(0);
-
-        // This mutex blocks all the threads until the last thread has had a chance to send parties-1 signals
-        // to the mutexToWaitForThreadsToArrive
-        this.mutexToWaitForThreadsToExecute = new Semaphore(0);
 
         // This mutex is initialized to 1 because the first thread shouldn't be blocked from updating the variable,
         // but subsequent threads should be
@@ -73,29 +68,6 @@ public class CyclicBarrier {
                 this.mutexToWaitForThreadsToArrive.release();
             }
         }
-
-
-        /* ********* Critical section for setting/getting numThreadsNeededToBreakBarrier ********* */
-        this.mutexForThreadEnteringBarrier.acquire();
-        this.numThreadsNeededToBreakBarrier--;
-        this.mutexForThreadEnteringBarrier.release();
-        /* **************************************** */
-
-        if (this.numThreadsNeededToBreakBarrier > 0)
-        {
-            this.mutexToWaitForThreadsToExecute.acquire();
-        }
-        else if (this.numThreadsNeededToBreakBarrier == 0)
-        {
-            this.reset();
-
-            // The last thread to enter must signal to all other threads (numParties - 1)
-            for (int i = 0; i < this.numPartiesAllowedToEnter - 1; i++)
-            {
-                this.mutexToWaitForThreadsToExecute.release();
-            }
-        }
-
 
         this.mutex.release();
 

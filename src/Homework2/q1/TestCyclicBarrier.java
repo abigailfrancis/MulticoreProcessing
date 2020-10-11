@@ -42,6 +42,11 @@ public class TestCyclicBarrier {
         testParams.add(new Object[]{1, 2});
         testParams.add(new Object[]{1, 1});
 
+        testParams.add(new Object[]{8, 24});
+        testParams.add(new Object[]{6, 24});
+        testParams.add(new Object[]{3, 24});
+        testParams.add(new Object[]{2, 24});
+
         return testParams;
     }
 
