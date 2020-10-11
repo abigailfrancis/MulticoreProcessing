@@ -36,7 +36,6 @@ public class CyclicBarrier {
         this.mutexForThreadEnteringBarrier = new Semaphore(1);
     }
 
-
     int await() throws InterruptedException {
 
         // Top level Mutex allows up to 'parties' threads to enter the method
@@ -44,7 +43,6 @@ public class CyclicBarrier {
 
         // Local variable to store the current thread's arrival index
         int myArrivalIndex;
-
 
         /* ********* Critical section for setting/getting numThreadsNeededToBreakBarrier ********* */
         this.mutexForThreadEnteringBarrier.acquire();
@@ -63,10 +61,7 @@ public class CyclicBarrier {
             this.reset();
 
             // The last thread to enter must signal to all other threads (numParties - 1)
-            for (int i = 0; i < this.getNumParties() - 1; i++)
-            {
-                this.mutexToWaitForThreadsToArrive.release();
-            }
+			this.mutexToWaitForThreadsToArrive.release(this.getNumParties() - 1);
         }
 
         this.mutex.release();
