@@ -1,14 +1,16 @@
 package Homework2.q1;
 
+import java.util.concurrent.Semaphore;
+
 public class CyclicBarrier {
 
     private final int numPartiesAllowedToEnter; // Number of threads required to trip the barrier
     private int numThreadsNeededToBreakBarrier; // Number of threads that the barrier is waiting on
 
-    private CountingSemaphore mutex;
-    private CountingSemaphore mutexForThreadEnteringBarrier;
-    private CountingSemaphore mutexToWaitForThreadsToArrive;
-    private CountingSemaphore mutexToWaitForThreadsToExecute;
+    private Semaphore mutex;
+    private Semaphore mutexForThreadEnteringBarrier;
+    private Semaphore mutexToWaitForThreadsToArrive;
+    private Semaphore mutexToWaitForThreadsToExecute;
 
     /* This class should only release threads only when
     the given number of threads are waiting upon it */
@@ -25,41 +27,41 @@ public class CyclicBarrier {
         this.numThreadsNeededToBreakBarrier = parties;
 
         // This mutex is the gatekeeper to the method
-        this.mutex = new CountingSemaphore(this.numPartiesAllowedToEnter);
+        this.mutex = new Semaphore(this.numPartiesAllowedToEnter);
 
         // This mutex blocks all the threads until this.numThreadsNeededToBreakBarrier = this.numPartiesAllowedToEnter
-        this.mutexToWaitForThreadsToArrive = new CountingSemaphore(0);
+        this.mutexToWaitForThreadsToArrive = new Semaphore(0);
 
         // This mutex blocks all the threads until the last thread has had a chance to send parties-1 signals
         // to the mutexToWaitForThreadsToArrive
-        this.mutexToWaitForThreadsToExecute = new CountingSemaphore(0);
+        this.mutexToWaitForThreadsToExecute = new Semaphore(0);
 
         // This mutex is initialized to 1 because the first thread shouldn't be blocked from updating the variable,
         // but subsequent threads should be
-        this.mutexForThreadEnteringBarrier = new CountingSemaphore(1);
+        this.mutexForThreadEnteringBarrier = new Semaphore(1);
     }
 
 
     int await() throws InterruptedException {
 
         // Top level Mutex allows up to 'parties' threads to enter the method
-        this.mutex.P();
+        this.mutex.acquire();
 
         // Local variable to store the current thread's arrival index
         int myArrivalIndex;
 
 
         /* ********* Critical section for setting/getting numThreadsNeededToBreakBarrier ********* */
-        this.mutexForThreadEnteringBarrier.P();
+        this.mutexForThreadEnteringBarrier.acquire();
         this.numThreadsNeededToBreakBarrier--;
         myArrivalIndex = this.numThreadsNeededToBreakBarrier;
-        this.mutexForThreadEnteringBarrier.V();
+        this.mutexForThreadEnteringBarrier.release();
         /* **************************************** */
 
 
         if (this.numThreadsNeededToBreakBarrier > 0)
         {
-            this.mutexToWaitForThreadsToArrive.P();
+            this.mutexToWaitForThreadsToArrive.acquire();
         }
         else if (this.numThreadsNeededToBreakBarrier == 0)
         {
@@ -68,20 +70,20 @@ public class CyclicBarrier {
             // The last thread to enter must signal to all other threads (numParties - 1)
             for (int i = 0; i < this.getNumParties() - 1; i++)
             {
-                this.mutexToWaitForThreadsToArrive.V();
+                this.mutexToWaitForThreadsToArrive.release();
             }
         }
 
 
         /* ********* Critical section for setting/getting numThreadsNeededToBreakBarrier ********* */
-        this.mutexForThreadEnteringBarrier.P();
+        this.mutexForThreadEnteringBarrier.acquire();
         this.numThreadsNeededToBreakBarrier--;
-        this.mutexForThreadEnteringBarrier.V();
+        this.mutexForThreadEnteringBarrier.release();
         /* **************************************** */
 
         if (this.numThreadsNeededToBreakBarrier > 0)
         {
-            this.mutexToWaitForThreadsToExecute.P();
+            this.mutexToWaitForThreadsToExecute.acquire();
         }
         else if (this.numThreadsNeededToBreakBarrier == 0)
         {
@@ -90,12 +92,12 @@ public class CyclicBarrier {
             // The last thread to enter must signal to all other threads (numParties - 1)
             for (int i = 0; i < this.numPartiesAllowedToEnter - 1; i++)
             {
-                this.mutexToWaitForThreadsToExecute.V();
+                this.mutexToWaitForThreadsToExecute.release();
             }
         }
 
 
-        this.mutex.V();
+        this.mutex.release();
 
         // Returns: the arrival index of the current thread, where index
         // (parties - 1) indicates the first to arrive and zero indicates
