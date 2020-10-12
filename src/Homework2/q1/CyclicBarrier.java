@@ -6,7 +6,7 @@ public class CyclicBarrier {
 	private static Semaphore sem_waitingParties;
 	private static Semaphore sem_allParties;
 	private static Semaphore sem_arrivalIdx;
-	private static Semaphore sem_round;
+	private static Semaphore sem_barrier = new Semaphore(0);
 	private static int arrivalIdx;
 	private int parties;
 	private final static Object obj = new Object();
@@ -23,7 +23,7 @@ public class CyclicBarrier {
         this.sem_allParties = new Semaphore(parties-1, true);
         this.sem_waitingParties = new Semaphore(parties, true);
         this.sem_arrivalIdx = new Semaphore(1, true);
-        this.sem_round = new Semaphore(1,true);
+        //this.sem_round = new Semaphore(1,true);
     }
 
     int await() throws InterruptedException {
@@ -47,9 +47,7 @@ public class CyclicBarrier {
     	
     	//if not the last thread, wait
     	if(sem_allParties.tryAcquire()) {
-    		synchronized(obj) {
-    			obj.wait();
-    		}
+    		sem_barrier.acquire();
     		//release semaphore after notified
     		sem_allParties.release();
     		
@@ -61,9 +59,9 @@ public class CyclicBarrier {
     			sem_arrivalIdx.acquire();
         		arrivalIdx = this.parties;
         		sem_arrivalIdx.release();
-        		
+        		sem_barrier.release(this.parties-1);
         		//notify everyone to release and continue
-    			obj.notifyAll();
+    			//obj.notifyAll();
     			
     			
         		//allow next party in
