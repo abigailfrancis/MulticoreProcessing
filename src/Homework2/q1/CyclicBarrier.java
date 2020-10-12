@@ -1,75 +1,67 @@
 package Homework2.q1;
-import java.util.concurrent.Semaphore;
 
-public class CyclicBarrier {
-	//counting semaphore 
-	private static Semaphore sem_waitingParties;
-	private static Semaphore sem_allParties;
-	private static Semaphore sem_arrivalIdx;
-	private static Semaphore sem_barrier = new Semaphore(0);
-	private static int arrivalIdx;
-	private int parties;
-	private final static Object obj = new Object();
-	//private boolean waiting = true;
-    public CyclicBarrier(int parties) {
-    	// Creates a new CyclicBarrier that will release threads only when
-    	// the given number of threads are waiting upon it    	
-    	//check parties input
-    	if (parties <= 0) {
-    		 throw new IllegalArgumentException(); 
-    	}
-    	this.parties = parties;
-    	this.arrivalIdx = parties;
-        this.sem_allParties = new Semaphore(parties-1, true);
-        this.sem_waitingParties = new Semaphore(parties, true);
-        this.sem_arrivalIdx = new Semaphore(1, true);
-        //this.sem_round = new Semaphore(1,true);
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+@RunWith(Parameterized.class)
+public class TestCyclicBarrier {
+    private final int numThreads;
+    private final int numParties;
+
+    /*
+    Unit tests for various implementations of Cyclic Barrier
+    This file covers the happy paths for various numParties and numThreads values
+     */
+    public TestCyclicBarrier(final int numParties, final int numThreads) {
+        this.numThreads = numThreads;
+        this.numParties = numParties;
     }
 
-    int await() throws InterruptedException {
-        // Waits until all parties have invoked await on this CyclicBarrier.
-    	// If the current thread is not the last to arrive then it is
-        // disabled for thread scheduling purposes and lies dormant until
-        // the last thread arrives.
-        // Returns: the arrival index of the current thread, where index
-        // (parties - 1) indicates the first to arrive and zero indicates
-        // the last to arrive.
-    	int retval = -1;
-    	//all threads wait here unless part of the current party
-    	sem_waitingParties.acquire();
-    	
-    	//decrement arrival index
-    	sem_arrivalIdx.acquire();
-    	arrivalIdx--;
-    	System.out.println(arrivalIdx);
-    	retval = arrivalIdx;
-    	sem_arrivalIdx.release();
-    	
-    	//if not the last thread, wait
-    	if(sem_allParties.tryAcquire()) {
-    		//wait 
-    		sem_barrier.acquire();
-    		//release semaphore after notified
-    		sem_allParties.release();
-    		
-    	}
-    	else {
-    			
-    			//set arrivalidx back to parties
-    			sem_arrivalIdx.acquire();
-        		arrivalIdx = this.parties;
-        		sem_arrivalIdx.release();
+    @Parameterized.Parameters()
+    public static Collection data() {
 
-        		//notify everyone to release and continue
-        		sem_barrier.release(this.parties-1);
-     			
-    			
-        		//allow next party in
-    			sem_waitingParties.release(this.parties);
+        ArrayList<Object> testParams = new ArrayList<Object>();
 
-    	}
-        
-        return retval;
+        // For happy path scenarios, numParties must divide evenly into numThreads
+        testParams.add(new Object[]{8, 8});
+        testParams.add(new Object[]{4, 8});
+        testParams.add(new Object[]{2, 8});
+        testParams.add(new Object[]{1, 8});
+        testParams.add(new Object[]{7, 7});
+        testParams.add(new Object[]{6, 6});
+        testParams.add(new Object[]{5, 5});
+        testParams.add(new Object[]{4, 4});
+        testParams.add(new Object[]{2, 4});
+        testParams.add(new Object[]{3, 3});
+        testParams.add(new Object[]{2, 2});
+        testParams.add(new Object[]{1, 2});
+        testParams.add(new Object[]{1, 1});
+
+        testParams.add(new Object[]{8, 24});
+        testParams.add(new Object[]{6, 24});
+        testParams.add(new Object[]{3, 24});
+        testParams.add(new Object[]{2, 24});
+
+        return testParams;
+    }
+
+    @Test
+    public void TestSynchronized() {
+        CyclicBarrierTester.runTest(numParties, numThreads);
+
+        // Each arrival index (parties -1, parties -2... 0) should occur numThreads/numParties times
+        int expectedCount = numThreads/ numParties;
+
+        for (int i = 0; i < numParties; i++)
+        {
+            Assert.assertTrue(CyclicBarrierTester.expectedArrivalIndices.containsKey(i));
+
+            Assert.assertTrue(CyclicBarrierTester.expectedArrivalIndices.get(i) == expectedCount);
+        }
     }
 }
-
