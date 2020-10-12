@@ -16,7 +16,7 @@ public class CyclicBarrier {
     	// the given number of threads are waiting upon it    	
     	//check parties input
     	if (parties <= 0) {
-    		//throw an exception
+    		 throw new IllegalArgumentException(); 
     	}
     	this.parties = parties;
     	this.arrivalIdx = parties;
@@ -47,26 +47,26 @@ public class CyclicBarrier {
     	
     	//if not the last thread, wait
     	if(sem_allParties.tryAcquire()) {
+    		//wait 
     		sem_barrier.acquire();
     		//release semaphore after notified
     		sem_allParties.release();
     		
     	}
     	else {
-    		synchronized(obj) {
     			
     			//set arrivalidx back to parties
     			sem_arrivalIdx.acquire();
         		arrivalIdx = this.parties;
         		sem_arrivalIdx.release();
-        		sem_barrier.release(this.parties-1);
+
         		//notify everyone to release and continue
-    			//obj.notifyAll();
-    			
+        		sem_barrier.release(this.parties-1);
+     			
     			
         		//allow next party in
     			sem_waitingParties.release(this.parties);
-    		}
+
     	}
         
         return retval;
