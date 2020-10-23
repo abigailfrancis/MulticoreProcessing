@@ -1,9 +1,9 @@
 package Homework3.q3a;
 
-public class LockFreeQueue implements MyQueue {
+public class LockQueue implements MyQueue {
     // you are free to add members
 
-    public LockFreeQueue() {
+    public LockQueue() {
         // implement your constructor here
     }
 

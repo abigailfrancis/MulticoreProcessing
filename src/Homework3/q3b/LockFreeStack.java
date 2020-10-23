@@ -1,21 +1,29 @@
 package Homework3.q3b;
 
-/*
- Implement Lock-Free stack of Integer. You should provide push(Integer x)
-         and Integer pop(). The pop operation should throw an exception called EmptyStack if the
-         stack is empty.
-*/
+public class LockFreeStack implements MyStack {
+    // you are free to add members
 
-public class LockFreeStack {
-
-    public void push(Integer x)
-    {
-
+    public LockFreeStack() {
+        // implement your constructor here
     }
 
-    public Integer pop() throws EmptyStack
-    {
-        return 0;
+    public boolean push(Integer value) {
+        // implement your push method here
+        return false;
     }
 
+    public Integer pop() throws EmptyStack {
+        // implement your pop method here
+        return null;
+    }
+
+    protected class Node {
+        public Integer value;
+        public Node next;
+
+        public Node(Integer x) {
+            value = x;
+            next = null;
+        }
+    }
 }
