@@ -123,7 +123,7 @@ public class LockFreeQueue implements MyQueue {
 
         public Node(Integer x) {
             value = x;
-            next = null;
+            next = new AtomicReference<Node>();
         }
     }
 }
