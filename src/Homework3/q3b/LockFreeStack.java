@@ -1,29 +1,65 @@
 package Homework3.q3b;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class LockFreeStack implements MyStack {
-    // you are free to add members
+    AtomicReference<Node> top;
 
     public LockFreeStack() {
-        // implement your constructor here
+        top = new AtomicReference<Node>();
     }
 
     public boolean push(Integer value) {
-        // implement your push method here
-        return false;
+        try
+        {
+            Node node = new Node(value);
+            while (true) {
+                Node oldTop = top.get();
+                node.next.set(oldTop);
+
+                if (top.compareAndSet(oldTop, node)) {
+                    return true;
+                } else {
+                    Thread.yield();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 
-    public Integer pop() throws EmptyStack {
-        // implement your pop method here
-        return null;
+    public Integer pop() throws EmptyStack
+    {
+        while(true)
+        {
+            Node oldTop = top.get();
+            if (oldTop == null)
+            {
+                throw new EmptyStack();
+            }
+
+            Integer val = oldTop.value;
+            Node newTop = oldTop.next.get();
+            if (top.compareAndSet(oldTop, newTop))
+            {
+                return val;
+            }
+            else
+            {
+                Thread.yield();
+            }
+        }
     }
 
     protected class Node {
         public Integer value;
-        public Node next;
+        public AtomicReference<Node> next;
 
         public Node(Integer x) {
             value = x;
-            next = null;
+            next = new AtomicReference<Node>();
         }
     }
 }

@@ -19,15 +19,20 @@ public class LockQueue implements MyQueue {
     }
 
     public boolean enq(Integer value) {
+        var enqSucceeded = false;
         enqLock.lock();
 
-        Node newNode = new Node(value);
-        tail.next = newNode;
-        tail = newNode;
-        count.getAndIncrement();
-
-        enqLock.unlock();
-        return true;
+        try {
+            Node newNode = new Node(value);
+            tail.next = newNode;
+            tail = newNode;
+            count.getAndIncrement();
+            enqSucceeded = true;
+        }
+        finally {
+            enqLock.unlock();
+            return enqSucceeded;
+        }
     }
 
     public Integer deq() {

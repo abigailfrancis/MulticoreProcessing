@@ -1,7 +1,8 @@
 package Homework3.q3a;
 
-import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -10,24 +11,30 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class LockQueueTests {
+@RunWith(Parameterized.class)
+public class QueueTests {
 
     private static MyQueue q;
-    private static Random generator;
     private static List<Integer> listOfItemsToEnqueue;
 
-    public LockQueueTests() {
+    public QueueTests(MyQueue q)
+    {
+        this.q = q;
+    }
 
-        // Run these tests with either Queue implementation
-        // q = new LockFreeQueue();
-        q = new LockQueue();
+    @Parameterized.Parameters()
+    public static Collection data() {
+        ArrayList<Object> testParams = new ArrayList<Object>();
 
-        generator = new Random();
+        // Run with both types of MyQueue
+        testParams.add(new LockQueue());
+        testParams.add(new LockFreeQueue());
+
+        return testParams;
     }
 
     @Test
     public void TestLockQueue_Simple() {
-        LockQueue q = new LockQueue();
         assertTrue(q.deq() == null);
         q.enq(5);
         q.enq(10);
@@ -40,7 +47,6 @@ public class LockQueueTests {
 
     @Test
     public void TestLockQueue_Simple2() {
-        LockQueue q = new LockQueue();
         assertTrue(q.deq() == null);
         q.enq(5);
         assertTrue(q.deq() == 5);
@@ -99,8 +105,8 @@ public class LockQueueTests {
         assertTrue(dequeuedItems.contains(3));
     }
 
-    public static void enqueue(Integer num) {
-            q.enq(num);
+    public static Boolean enqueue(Integer num) {
+            return q.enq(num);
     }
 
     public static Integer dequeue() {
@@ -112,7 +118,7 @@ public class LockQueueTests {
         ExecutorService executor = Executors.newFixedThreadPool(4);
 
         // Create list to hold future integer counts
-        List<Future> listP = new ArrayList<Future>();
+        List<Future<Boolean>> listP = new ArrayList<Future<Boolean>>();
         List<Future<Integer>> listC = new ArrayList<Future<Integer>>();
 
         List<Producer> P = new ArrayList<>();
@@ -129,10 +135,7 @@ public class LockQueueTests {
         }
 
         try {
-            for(int i = 0; i < P.size(); i++)
-            {
-                listP.add(executor.submit(P.get(i)));
-            }
+            listP = executor.invokeAll(P);
 
             // Thread.sleep, to allow the producers to finish before the consumers start
             Thread.sleep(100);
@@ -155,29 +158,31 @@ public class LockQueueTests {
                 }
             }
 
-            for (Future<Integer> future : listP) {
-                future.get();
-                // System.out.println("Something was produced");
+            for (Future<Boolean> future : listP) {
+                try {
+                    var result = future.get();
+                    // System.out.println("Something was produced");
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
             }
-
         }
         catch (InterruptedException e)
         {
             // Do nothing
-        } catch (ExecutionException e) {
-            e.printStackTrace();
         }
 
         executor.shutdown();
     }
 
-    class Producer implements Runnable{
-
+    class Producer implements Callable<Boolean> {
         @Override
-        public void run() {
+        public Boolean call(){
+            var result = true;
             for (int p = 0; p < listOfItemsToEnqueue.size(); p++) {
-                LockQueueTests.enqueue(listOfItemsToEnqueue.get(p));
+                result = result & QueueTests.enqueue(listOfItemsToEnqueue.get(p));
             }
+            return result;
         }
     }
 
@@ -185,7 +190,7 @@ public class LockQueueTests {
     class Consumer implements Callable<Integer> {
         @Override
         public Integer call() throws Exception {
-            return LockQueueTests.dequeue();
+            return QueueTests.dequeue();
         }
     }
 }
