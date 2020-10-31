@@ -58,4 +58,9 @@ public class LockQueue implements MyQueue {
             next = null;
         }
     }
+
+    public AtomicInteger getCount()
+    {
+        return count;
+    }
 }
