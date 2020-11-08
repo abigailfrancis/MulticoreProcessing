@@ -19,7 +19,6 @@ public class LockFreeQueue implements MyQueue {
     }
 
     public boolean enq(Integer value) {
-    	boolean done = false;
     	//create new node to enq
     	Node tail_enq = new Node(value);
     	
@@ -27,7 +26,7 @@ public class LockFreeQueue implements MyQueue {
     	Node tail_next;
 
     	//try continuously to add node until done
-    	while(!done) {
+    	while(true) {
 
     		tail_cpy = this.tail.get();
     		tail_next = tail_cpy.next.get();
@@ -35,16 +34,16 @@ public class LockFreeQueue implements MyQueue {
         	//make sure tail was updated to new tail
         	if(tail_next == null) {
         		//set tail next to enq
-	    		if(tail_cpy.next.compareAndSet(tail_next, tail_enq)) {
+	    		if(this.tail.get().next.compareAndSet(tail_next, tail_enq)) {
 	    			//Set tail to enq
 		        	if(this.tail.compareAndSet(tail_cpy, tail_enq)) {
-		        		done = true;
+		        		return true;
 	        		}
 	        	}
         	}
     	}
    
-        return false;
+        
     }
 
     public Integer deq() {
@@ -66,11 +65,13 @@ public class LockFreeQueue implements MyQueue {
         		retval = node_deq.value;
         		if(tail_cpy == node_deq) {
         			this.tail.compareAndSet(node_deq, this.head.get());
-        		}
         			if(this.head.get().next.compareAndSet(node_deq, node_deq.next.get())) {
-        	
             			return retval;
         			}
+        		}
+        		else if(this.head.get().next.compareAndSet(node_deq, node_deq.next.get())) {
+        			return retval;
+    			}
         		}
     }
   }
